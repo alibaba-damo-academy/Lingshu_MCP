@@ -20,14 +20,11 @@ import PIL
 from fastmcp import FastMCP
 from openai import AsyncOpenAI
 
-# 配置日志
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# 创建FastMCP应用实例
 app = FastMCP("lingshu")
 
-# 配置参数
 DEFAULT_TIMEOUT = 60.0
 
 
@@ -44,7 +41,6 @@ class LingshuModelClient:
                       max_tokens: int = 2048, temperature: float = 0.1) -> str:
         """Call Lingshu model to generate response"""
         try:
-            # 构建消息内容
             if image_data:
                 content = [
                     {"type": "text", "text": prompt},
@@ -54,7 +50,7 @@ class LingshuModelClient:
                 content = prompt
             
             response = await self.llm_client.chat.completions.create(
-                model=self.model,  # 修复：使用self.model
+                model=self.model, 
                 messages=[{"role": "user", "content": content}],
                 max_tokens=max_tokens,
                 temperature=temperature
@@ -66,12 +62,11 @@ class LingshuModelClient:
             raise Exception(f"Lingshu model call failed: {str(e)}")
 
 
-# 创建模型客户端实例
 lingshu_client = LingshuModelClient()
 
 
 @app.tool(name="analyze_medical_image", description="Analyze medical images using Lingshu")
-async def analyze_medical_image(  # 修改为async函数
+async def analyze_medical_image( 
     image_path: str,
     analysis_type: str = "radiology",
     patient_context: str = "",
@@ -89,7 +84,7 @@ async def analyze_medical_image(  # 修改为async函数
     - Dictionary containing detailed medical analysis
     """
     try:
-        # 验证图像数据
+
         if not image_path:
             return {"error": "No image data provided"}
         
@@ -97,12 +92,12 @@ async def analyze_medical_image(  # 修改为async函数
             image_base64 = base64.b64encode(f.read()).decode("utf-8")
         
         
-        # 验证分析类型
+        
         valid_types = ["radiology", "pathology", "dermatology", "ophthalmology", "general"]
         if analysis_type not in valid_types:
             analysis_type = "general"
         
-        # 构建专业的医学分析提示词
+
         if language == "en":
             prompt = f"""You are a highly trained medical AI assistant specializing in {analysis_type} image analysis.
 
@@ -166,7 +161,6 @@ Provide your analysis in a structured, professional medical report format."""
 
 请以结构化的专业医学报告格式提供分析。"""
         
-        # 直接await调用模型
         result = await lingshu_client.generate(
             prompt=prompt,
             image_data=image_base64,
@@ -193,7 +187,7 @@ Provide your analysis in a structured, professional medical report format."""
 
 
 @app.tool(name="generate_medical_report", description="Generate structured medical reports using Lingshu medical model")
-async def generate_medical_report(  # 修改为async函数
+async def generate_medical_report(  
     findings: List[str],
     report_type: str = "diagnostic",
     patient_info: Dict[str, Any] = None,
@@ -220,15 +214,13 @@ async def generate_medical_report(  # 修改为async函数
         if not patient_info:
             patient_info = {}
         
-        # 构建发现列表文本
+
         findings_text = "\n".join([f"• {finding}" for finding in findings])
         
-        # 构建患者信息文本
         patient_text = ""
         if patient_info:
             patient_text = f"Patient Information:\n{json.dumps(patient_info, indent=2)}\n"
         
-        # 根据语言构建提示词
         if language == "en":
             prompt = f"""You are a medical reporting specialist. Generate a comprehensive {report_type} medical report based on the following findings.
 
@@ -300,7 +292,6 @@ Ensure the report is:
 - 对医护人员清晰可行
 - 符合医学报告标准"""
 
-        # 直接await调用模型
         result = await lingshu_client.generate(
             prompt=prompt,
             max_tokens=3072,
@@ -328,7 +319,7 @@ Ensure the report is:
 
 
 @app.tool(name="medical_qa", description="Answer medical questions using Lingshu medical model")
-async def medical_qa(  # 修改为async函数
+async def medical_qa(
     question: str,
     context: str = "",
     specialty: str = "general",
@@ -350,7 +341,6 @@ async def medical_qa(  # 修改为async函数
         if not question.strip():
             return {"error": "No question provided"}
         
-        # 构建专业的医学问答提示词
         if language == "en":
             prompt = f"""You are a knowledgeable medical expert specializing in {specialty}. 
 Please provide a comprehensive, accurate, and professional answer to the following medical question.
@@ -384,7 +374,6 @@ Note: This response is for educational purposes and should not replace professio
 
 注意：此回答仅用于教育目的，不应替代专业医学咨询。"""
 
-        # 直接await调用模型
         result = await lingshu_client.generate(
             prompt=prompt,
             max_tokens=2048,
@@ -446,7 +435,6 @@ Integration Config:
 }}
     """)
     
-    # 启动FastMCP服务器
     app.run(
         transport="streamable-http",
         host=args.host,
