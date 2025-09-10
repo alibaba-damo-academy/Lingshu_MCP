@@ -25,20 +25,18 @@ This project implements a FastMCP server for the Lingshu medical AI model and a 
 
 ## Usage
 
-### Starting the Server
-
-#### Use vLLM to serve the Lingshu Model
+### Use vLLM to serve the Lingshu Model
 ```bash
 vllm serve lingshu-medical-mllm/Lingshu-7B  --dtype float16 --api_key api_key --port 8000  --max-model-len 32768
 ```
-#### Wrap the server with FastMCP
+### Wrap the server with FastMCP
 ```python
 export LINGSHU_SERVER_URL="http://localhost:8000/v1" 
 export LINGSHU_SERVER_API="api_key"
 export LINGSHU_MODEL="lingshu-medical-mllm/Lingshu-7B" # the above config depends on your vllm server config
 python mcp_server_lingshu.py --host 127.0.0.1 --port 4200 --path /lingshu --log-level info
 ```
-#### Try connect Lingshu with MCP
+### Try connect Lingshu with MCP
 ```python
 export LLM_SERVER_URL="xxx"
 export LLM_SERVER_API="xxx"
