@@ -1,0 +1,5 @@
+openai
+mcp
+fastmcp
+pillow
+vllm
