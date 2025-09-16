@@ -36,7 +36,7 @@ export LINGSHU_SERVER_API="api_key"
 export LINGSHU_MODEL="lingshu-medical-mllm/Lingshu-7B" # the above config depends on your vllm server config
 python mcp_server_lingshu.py --host 127.0.0.1 --port 4200 --path /lingshu --log-level info
 ```
-### Try connect Lingshu with MCP
+### Try connecting Lingshu with MCP
 ```python
 export LLM_SERVER_URL="xxx"
 export LLM_SERVER_API="xxx"
